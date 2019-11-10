@@ -323,32 +323,26 @@ public static prodctsList load (String fileName) throws IOException{
 		if (title==null) {
 			return;
 		}
-		JTextField string = new JTextField (10);
+		
 		  JPanel panel = new JPanel();
-		  panel.add(new JLabel(title+" is not in the inventory, would you like to add a new DVD to the inventory? Y/n"));
-		  panel.add(string);
-		  String answer= null;
+		  panel.add(new JLabel("'"+title+"' is not in the inventory, would you like to add a new DVD to the inventory?"));
+		  int want=-1;
 		  int result = JOptionPane.showConfirmDialog(null, panel, 
-	              "Please Enter Title Values", JOptionPane.OK_CANCEL_OPTION);
-	     if (result == JOptionPane.OK_OPTION) {
-	    	  answer = string.getText();
+	              "Input", JOptionPane.YES_NO_OPTION,JOptionPane.INFORMATION_MESSAGE);
+	     if (result == JOptionPane.YES_OPTION) {
+	    	 want = intInput();
+	    	 if (want>-1) {
+	    		 InventoryItem product= new InventoryItem(title,0,want);
+	    		 list.add(product);
+	    		 JOptionPane.showMessageDialog(null,"'"+ title+"' added to the inventory");
+	    	 }
+	    	 else {
+	    		 
+	    	 }
+	    	 
 	     }
-			
-			int want=-1;
-			switch (answer.toLowerCase()) {
-			case "y":
-				System.out.println("Enter want value for the new DVD");
-				want = intInput();
-				addProduct(title,want);
-				JOptionPane.showMessageDialog(null,title+" added to the inventory.");
-				break;                        
-			case "n":
-				JOptionPane.showMessageDialog(null,title+" is not added to the inventory");
-				break;
-			default:
-				JOptionPane.showMessageDialog(null, "wrong input\n\nTry again");
-				isExists(title);
-		}
+	     else
+	    	 JOptionPane.showMessageDialog(null, title+" not added to the inventory");
 	}
 	
 	private static String[] nameAndPhoneNumber(String title) {
@@ -379,26 +373,28 @@ public static prodctsList load (String fileName) throws IOException{
 	      }
 	      return string;
 	}
-	private static int  intInput() {
+		private static int  intInput() {
 		  JTextField Int = new JTextField(5);
-		  JPanel panel = new JPanel();
+		  Object[] fields = {"Please Enter want value:",Int};
 		  int want =-1;
-		  panel.add(new JLabel("want:"));
-		  panel.add(Int);
-		  int result = JOptionPane.showConfirmDialog(null, panel, 
-	              "Please Enter want Value", JOptionPane.OK_CANCEL_OPTION);
+		  int result = JOptionPane.showConfirmDialog(null, fields, 
+	              "Input", JOptionPane.OK_CANCEL_OPTION,JOptionPane.DEFAULT_OPTION);
 	     if (result == JOptionPane.OK_OPTION) {
 	    	 try {
 		  want = Integer.parseInt(Int.getText());
+		  if (want ==-1) {
+			  want=-2;
+		  }
 	    	 }
 	     catch(NumberFormatException e){
 		  JOptionPane.showMessageDialog(null,"Not a number input");
+		  want = intInput();
 	     }
+	    	if (want<-1) {
+	    		JOptionPane.showMessageDialog(null, "Cannot enter negative numbers");
+	    		want = intInput();
+	    	}
 	  }
-	  if (want==-1) {
-		  JOptionPane.showMessageDialog(null, "Wrong have or want input\n\n try Again");	
-		  intInput();
-		  }
 	  return want;
 	  }
 	
