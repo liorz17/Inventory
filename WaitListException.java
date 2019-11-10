@@ -1,7 +1,7 @@
 
 public class WaitListException	extends Error {
-	public WaitListException(String message) {
-		System.out.println(message);
-		System.err.println("continue?");
+		public WaitListException(String message) {
+		// TODO Auto-generated constructor stub
+		JOptionPane.showMessageDialog(null, message);
 	}
 }
