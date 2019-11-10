@@ -294,15 +294,7 @@ public static prodctsList load (String fileName) throws IOException{
 			i++;
 		}
 		if (isExists== false) {
-			String answer =JOptionPane.showInputDialog("Product wasn't found, adding the product to the list.");
-			if (answer.equalsIgnoreCase("y")) {
-				int want = Integer.parseInt(JOptionPane.showInputDialog("Enter want value for new title "));
-				addProduct(title, want);
-			}
-			else if (!answer.equalsIgnoreCase("n")) {
-				JOptionPane.showMessageDialog(null, "Wring input\n\nProduct is not added to the inventory");
-			}
-			
+			isExists(title);
 			
 		}
 	}
