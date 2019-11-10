@@ -4,7 +4,7 @@ public class PhoneNumberNotValidException extends Exception {
 		super("not valid phone number\nCustomers is not saved to the file\nTry again");
 	}
 	public PhoneNumberNotValidException(String message){
-		super(message);
+		JOptionPane.showMessageDialog(null, message);
 	}
 
 }
