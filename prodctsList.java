@@ -42,17 +42,21 @@ public class prodctsList implements Serializable{
 			else list.add(addSortIndex(product.getTitle()), product);		
 		}
 	}
-	
-	/* add a product to the inventory
-	 * add the same as the previous add product method but with have value
+	/**
+	 * add a product to the inventory 
+	 * @precondition  title , want, value
+	 * @param name is the title of the DVD
+	 * @param want is the ideal number of DVD that should be in the inventory
+	 * @param have- the number of DVD current in stock 
 	 */
+	
 	public void addProduct(String title,int have,int want) {
 		int i =0;
 		boolean isExists = false;
 		while ( i<size()) {
 			InventoryItem item = getIndexedProduct(i);
 			if (getIndexedProduct(i).getTitle().equals(title)) {
-				System.out.println(title+ " already exists in the inventory");
+				JOptionPane.showMessageDialog(null,title+ " already exists in the inventory");
 				isExists = true;
 			}
 			i++;
@@ -64,22 +68,49 @@ public class prodctsList implements Serializable{
 		}
 	}
 	
-	// remove a product from the inventory
-	public void removeProduct(int index) {
-		if (!list.isEmpty()) list.remove(index);
+	/** remove a product from the inventory at the index specified
+	 * @param index
+	 */
+	public void removeProduct(String title) {
+		if (!list.isEmpty()) {
+			for (int i=0;i<size();i++) {
+				InventoryItem item = getIndexedProduct(i);
+				if (getIndexedProduct(i).getTitle().equals(title)) {
+					list.remove(i);
+					return;
+				}
+			}
+			isExists(title);
+			
+		}
 		else throw new WaitListException("Product list is empty on getFirst");
 	}
+	/**
+	 * 
+	 * @return if list is not empty, return product at index=1
+	 * @throws WaitListException
+	 */
 	public InventoryItem getFirstProduct () throws WaitListException {
 		if (!list.isEmpty()) return list.get(0);
 		else throw new WaitListException("Product list is empty on getFirst");
 		}
+	/**
+	 * @param index
+	 * @return Inventory Item at the specified index
+	 */
 	public InventoryItem getIndexedProduct(int index) {
 		if (!list.isEmpty()) return list.get(index);
 		else throw new WaitListException("Product list is empty on get");
 	}
+	/**
+	 * @return true if the list is empty, otherwise false
+	 */
 	public boolean isEmpty() {
 		return list.isEmpty();
 	}
+	/**
+	 * remove all the Inventory items from the list
+	 */
 	public void removeAll() {
 		list.removeAll(list);
 	}
@@ -95,9 +126,14 @@ public class prodctsList implements Serializable{
 		
 	}
 	
-	//Program commands
+	// the path to the directory of the java file 
 	private final static String filePath=System.getProperty("user.dir");
-
+/**
+ * load the products list; 
+ * @param fileName
+ * @return the list of products uploaded from the file
+ * @throws IOException
+ */
 public static prodctsList load (String fileName) throws IOException{
 		
 		prodctsList restoredInventory;
@@ -110,29 +146,33 @@ public static prodctsList load (String fileName) throws IOException{
 
 		}
 		catch(Exception e){
-			System.out.println("The system cannot find the file specified.\nCreating new file");
+			JOptionPane.showMessageDialog(null,"The system cannot find the file specified.\nCreating new file");
 			restoredInventory = new prodctsList();
 		}
 		return restoredInventory;
 	}
-	public void help() {
-		System.out.println("Commands:\n"+"I<title> (inquire): Display the inventory information for the specific title"+
-	"\n"+"L (list): List the entire inventory."+"\nA <title> (ADD:) add a new title to the inventory with the initial want value\n"
-				+"M <title> (modify): Modify the want value for a specific title\n"+"D (delivery)\n"
-	+"O (order): purchace order of a shipment of DVD's to the want value\n"+"R (return):  reduce the have value to the return value\n"+"S <title> (sell): sell the title, if the title is sold"
-			+ " out putting the name in the waitList for the title\n"+"Q (quit) : save and quit the program");
+	public String help() {
+		return("Commands:\n"+"Search <title> (inquire): Display the inventory information for the specific title"+
+	"\n"+" add <title>: add a new title to the inventory with the initial want value\n"
+				+"Modify <title>: Modify the want value for a specific title\n"+"Delivery <title>\n"
+	+"Order: purchace order of a shipment of DVD's to the want value\n"+"Sell <title>: sell the title, if the title is sold"
+			+ " out putting the name in the waitList for the title\n");
 	}
-	
-	public String inquire(String title) {
+	/**
+	 * find the product with the specific title
+	 * @param title
+	 * @return the product or null if cannot find the searched product.
+	 */
+	public InventoryItem inquire(String title) {
 		int i =0;
 		while ( i<size()) {
 			InventoryItem item = getIndexedProduct(i);
 			if (getIndexedProduct(i).getTitle().equals(title)) {
-				return item.toString();
+				return item;
 			}
 			i++;
 		}
-		return title +" not found";
+		return null;
 	}
 	public void list() {
 		
@@ -141,6 +181,11 @@ public static prodctsList load (String fileName) throws IOException{
 			
 		}
 	}
+	/**
+	 * change the want value of the specific product 
+	 * @param title
+	 * @param want - the ideal number of DVD in stock.
+	 */
 	public void modify(String title, int want) {
 		int i =0;
 		boolean found = false;
@@ -170,6 +215,11 @@ public static prodctsList load (String fileName) throws IOException{
 			i++;
 		}
 	}
+	/**
+	 * sell one product of the specific title, if the product is out of stock, add the customer to the wait list
+	 * @param title
+	 * @throws PhoneNumberNotValidException
+	 */
 	public void sell(String title) throws PhoneNumberNotValidException {
 		int i =0;
 		boolean found = false;
@@ -178,14 +228,10 @@ public static prodctsList load (String fileName) throws IOException{
 			if (getIndexedProduct(i).getTitle().equals(title)) {
 				found=true;
 				if (item.getHaveValue()==0) {
-					System.out.println(title+" is out of stock. Enter Customer full name and phone number ");
-					Scanner kbd = new Scanner (System.in);
-					String firstName=kbd.next();
-					String lastName = kbd.next();
-					String phoneNumber = kbd.next();
-					Customers newCustomers = new Customers(firstName,lastName,phoneNumber);
+					String[] inputs=nameAndPhoneNumber(title);
+					Customers newCustomers = new Customers(inputs[0],inputs[1],inputs[2]);
 					getIndexedProduct(i).addToWaitList(newCustomers);
-					System.out.println(getIndexedProduct(i).get()+" added to the wait list");
+					JOptionPane.showMessageDialog(null, " added to the wait list");
 				}
 				else {
 					getIndexedProduct(i).setHaveValue(item.getHaveValue()-1);
@@ -199,6 +245,12 @@ public static prodctsList load (String fileName) throws IOException{
 			isExists(title);
 		}
 	}
+	/**
+	 * save the products list to a file.
+	 * @param fileName
+	 * @param products
+	 * @throws IOException
+	 */
 	public void quit (String fileName,prodctsList products) throws IOException{
 		try {
 		FileOutputStream file = new FileOutputStream(fileName);
@@ -210,6 +262,12 @@ public static prodctsList load (String fileName) throws IOException{
 			System.out.println(e);
 		}
 	}
+	/**
+	 * subtract by 1 the number of a specific product. if there are customers on the wait list, remove as much
+	 * customers as possible from the list. if the product is not found asking to add a new product with the title that was input. 
+	 * @param title
+	 * @param count
+	 */
 	public void delivery(String title,int count) {
 		int i =0;
 		boolean isExists = false; 
@@ -236,12 +294,23 @@ public static prodctsList load (String fileName) throws IOException{
 			i++;
 		}
 		if (isExists== false) {
-			System.out.println("Product wasn't found, adding the product to the list.\nEnter want value for new title ");
-			Scanner kbd = new Scanner(System.in);
-			int want = kbd.nextInt();
-			addProduct(title, want);
+			String answer =JOptionPane.showInputDialog("Product wasn't found, adding the product to the list.");
+			if (answer.equalsIgnoreCase("y")) {
+				int want = Integer.parseInt(JOptionPane.showInputDialog("Enter want value for new title "));
+				addProduct(title, want);
+			}
+			else if (!answer.equalsIgnoreCase("n")) {
+				JOptionPane.showMessageDialog(null, "Wring input\n\nProduct is not added to the inventory");
+			}
+			
+			
 		}
 	}
+	/**
+	 * method to get the have to be equal to the want value of the product. 
+	 * if the product does not exist, ask to add the product to the inventory 
+	 * @param title
+	 */
 	public void Order (String title) {
 		int i =0;
 		boolean found= false;
@@ -257,61 +326,88 @@ public static prodctsList load (String fileName) throws IOException{
 			isExists(title);
 		}
 	}
+	//find 
 	private void isExists(String title) {
-			System.out.println(title+" is not in the inventory, would you like to add a new DVD to the inventory? Y/n");
-			Scanner kbd = new Scanner(System.in);
-
-			String answer = kbd.next();
-			int want;
-			switch (answer) {
-			case "Y":
-				System.out.println("Enter want value for the new DVD");
-				want = kbd.nextInt();
-				addProduct(title,want);
-				System.out.println("DVD added to the inventory.");
-				break;
+		if (title==null) {
+			return;
+		}
+		JTextField string = new JTextField (10);
+		  JPanel panel = new JPanel();
+		  panel.add(new JLabel(title+" is not in the inventory, would you like to add a new DVD to the inventory? Y/n"));
+		  panel.add(string);
+		  String answer= null;
+		  int result = JOptionPane.showConfirmDialog(null, panel, 
+	              "Please Enter Title Values", JOptionPane.OK_CANCEL_OPTION);
+	     if (result == JOptionPane.OK_OPTION) {
+	    	  answer = string.getText();
+	     }
+			
+			int want=-1;
+			switch (answer.toLowerCase()) {
 			case "y":
 				System.out.println("Enter want value for the new DVD");
-				want = kbd.nextInt();
+				want = intInput();
 				addProduct(title,want);
-				System.out.println("DVD added to the inventory.");
-				break;                          
+				JOptionPane.showMessageDialog(null,title+" added to the inventory.");
+				break;                        
 			case "n":
-				System.out.println("DVD is not added to the inventory");
-				break;
-			case "N":
-				System.out.println("DVD is not added to the inventory");
+				JOptionPane.showMessageDialog(null,title+" is not added to the inventory");
 				break;
 			default:
-				System.out.println("wrong input");
-			
+				JOptionPane.showMessageDialog(null, "wrong input\n\nTry again");
+				isExists(title);
 		}
 	}
-
-	public static void main (String [] args) throws IOException, PhoneNumberNotValidException {
-		String fileName = "Incoming shipment.txt";
-		prodctsList list =load(fileName);
-		System.out.println("\nadding DVD to the inventory:");
-		list.addProduct("Iron Man", 9);
-		list.addProduct("Metrix", 9, 15);
-		list.addProduct("Aladin", 13, 15);
-		list.addProduct("Pulp fiction", 13, 17);
-		list.list();
-		System.out.println("\nOrder +inquire(to show the change in the have value of the DVD):");
-		list.Order("Metrix");
-		System.out.println(list.inquire("Metrix"));
-		System.out.println("\nSell");
-		list.sell("Iron Man");
-		System.out.println("\nDelivery + inquire(to show the change in the have value of the DVD)");
-		list.delivery("Aladin", 10);
-		list.inquire("Aladin");
-		System.out.println("\nsave and quit");
-		list.quit(fileName, list);
-		System.out.println("load: (loading the file)");
-		prodctsList products = load(fileName);
-		products.list();
-		System.out.println("\ntrying to add an existing DVD");
-		products.addProduct("Aladin", 15);
 	
+	private static String[] nameAndPhoneNumber(String title) {
+		String[] string = new String[3] ;
+		JTextField firstName = new JTextField(10);
+		JTextField lastName = new JTextField(15);
+		JTextField phoneNumber = new JTextField (12);
+		JPanel panel = new JPanel();
+		panel.add(new JLabel("First Name:"));
+		panel.add(firstName);
+		panel.add(Box.createHorizontalStrut(10));
+		panel.add(new JLabel("Last Name"));
+		panel.add(lastName);
+		panel.add(Box.createHorizontalStrut(10));
+		panel.add(new JLabel("Phone Number"));
+		panel.add(phoneNumber);
+		int result = JOptionPane.showConfirmDialog(null, panel, 
+				title+" is out of stock. Enter Customer full name and phone number ", JOptionPane.OK_CANCEL_OPTION);
+	      if (result == JOptionPane.OK_OPTION) {
+	    	  String fName = firstName.getText();
+	    	  String lName=lastName.getText();
+	    	  String phNumber=phoneNumber.getText();
+	    	  if (fName == "" || fName==null|| lName==null||lName==""||phNumber==null||phNumber=="") {
+	    		  JOptionPane.showMessageDialog(null, "Wrong input\n\n try Again");	
+	    		  nameAndPhoneNumber(title);
+	    		  } 
+	    	  string[0]=fName;string[1]=lName;string[2]=phNumber;
+	      }
+	      return string;
 	}
+	private static int  intInput() {
+		  JTextField Int = new JTextField(5);
+		  JPanel panel = new JPanel();
+		  int want =-1;
+		  panel.add(new JLabel("want:"));
+		  panel.add(Int);
+		  int result = JOptionPane.showConfirmDialog(null, panel, 
+	              "Please Enter want Value", JOptionPane.OK_CANCEL_OPTION);
+	     if (result == JOptionPane.OK_OPTION) {
+	    	 try {
+		  want = Integer.parseInt(Int.getText());
+	    	 }
+	     catch(NumberFormatException e){
+		  JOptionPane.showMessageDialog(null,"Not a number input");
+	     }
+	  }
+	  if (want==-1) {
+		  JOptionPane.showMessageDialog(null, "Wrong have or want input\n\n try Again");	
+		  intInput();
+		  }
+	  return want;
+	  }
+	
 }
